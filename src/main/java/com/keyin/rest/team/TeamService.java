@@ -1,10 +1,7 @@
 package com.keyin.rest.team;
 
 import com.keyin.rest.division.Division;
-import com.keyin.rest.division.DivisionRepository;
 import com.keyin.rest.division.DivisionService;
-import com.keyin.rest.player.Player;
-import com.keyin.rest.player.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +10,10 @@ import java.util.Optional;
 
 @Service
 public class TeamService {
+
     @Autowired
     private TeamRepository teamRepository;
+
     @Autowired
     private DivisionService divisionService;
 
@@ -23,17 +22,15 @@ public class TeamService {
     }
 
     public Team getTeamById(long id) {
-        Optional<Team> teamOptional = teamRepository.findById(id);
-
-        return teamOptional.orElse(null);
+        return teamRepository.findById(id).orElse(null);
     }
 
     public List<Team> getTeamsByPlayerLastName(String playerLastName) {
-        return teamRepository.findByPlayers_LastName(playerLastName);
+        return teamRepository.findByPlayers_LastNameIgnoreCase(playerLastName);
     }
 
     public List<Team> getTeamsByDivisionName(String divisionName) {
-        return teamRepository.findByDivision_Name(divisionName);
+        return teamRepository.findByDivision_NameIgnoreCase(divisionName);
     }
 
     public void deleteTeamById(long id) {
@@ -41,18 +38,8 @@ public class TeamService {
     }
 
     public Team createTeam(Team newTeam) {
-        String divisionName = newTeam.getDivision().getName();
-
-        if (divisionName != null) {
-            Division division = divisionService.findByName(divisionName);
-
-            if (division == null) {
-                division = divisionService.createDivision(newTeam.getDivision());
-            }
-
-            newTeam.setDivision(division);
-        }
-
+        Division division = getOrCreateDivision(newTeam.getDivision());
+        newTeam.setDivision(division);
         return teamRepository.save(newTeam);
     }
 
@@ -63,14 +50,23 @@ public class TeamService {
             Team teamToUpdate = teamToUpdateOptional.get();
 
             teamToUpdate.setName(updatedTeam.getName());
-            teamToUpdate.setDivision(divisionService.getDivisionById(updatedTeam.getDivision().getId()));
-
+            teamToUpdate.setDivision(getOrCreateDivision(updatedTeam.getDivision()));
             teamToUpdate.setPlayers(updatedTeam.getPlayers());
-            // update players
 
             return teamRepository.save(teamToUpdate);
         }
 
         return null;
+    }
+
+    // Helper method to get or create a division
+    private Division getOrCreateDivision(Division divisionInput) {
+        if (divisionInput == null || divisionInput.getName() == null) return null;
+
+        Division division = divisionService.findByName(divisionInput.getName());
+        if (division == null) {
+            division = divisionService.createDivision(divisionInput);
+        }
+        return division;
     }
 }
