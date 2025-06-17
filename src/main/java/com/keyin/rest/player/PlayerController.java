@@ -1,46 +1,52 @@
 package com.keyin.rest.player;
 
-import com.keyin.rest.division.Division;
-import com.keyin.rest.division.DivisionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.*;
+import java.time.LocalDate;
 
-import java.util.List;
+@Entity
+public class Player {
 
-@RestController
-@CrossOrigin
-public class PlayerController {
-    @Autowired
-    private PlayerService playerService;
+    @Id
+    @SequenceGenerator(name = "player_sequence", sequenceName = "player_sequence", allocationSize = 1, initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "player_sequence")
+    private long id;
 
-    @GetMapping("/players")
-    public List<Player> getAllPlayers() {
-        return playerService.getAllPlayers();
+    private LocalDate birthday;
+    private String firstName;
+    private String lastName;
+
+    public Player() {
     }
 
-    @GetMapping("/player_search")
-    public Player getPlayerByLastName(@RequestParam("last_name") String lastName) {
-        return playerService.getPlayerByLastName(lastName);
+    public long getId() {
+        return id;
     }
 
-    @GetMapping("/player/{id}")
-    public Player getPlayerById(@PathVariable long id) {
-        return playerService.getPlayerById(id);
+    public void setId(long id) {
+        this.id = id;
     }
 
-    @PostMapping("/player")
-    public Player createPlayer(@RequestBody Player player) {
-        return playerService.createPlayer(player);
+    public LocalDate getBirthday() {
+        return birthday;
     }
 
-    @PutMapping("/player/{id}")
-    public ResponseEntity<Player> updatePlayer(@PathVariable long id, @RequestBody Player player) {
-        return ResponseEntity.ok(playerService.updatePlayer(id, player));
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
     }
 
-    @DeleteMapping("/player/{id}")
-    public void deletePlayerById(@PathVariable long id) {
-        playerService.deletePlayerById(id);
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }
