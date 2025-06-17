@@ -12,11 +12,11 @@ public class DivisionService {
     private DivisionRepository divisionRepository;
 
     public Division findByName(String name) {
-        return divisionRepository.findByName(name);
+        return divisionRepository.findByName(name).orElse(null);
     }
 
     public Division findByStartBirthYear(String startBirthYear) {
-        return divisionRepository.findByStartBirthYear(startBirthYear);
+        return divisionRepository.findByStartBirthYear(startBirthYear).orElse(null);
     }
 
     public List<Division> getAllDivisions() {
@@ -24,9 +24,7 @@ public class DivisionService {
     }
 
     public Division getDivisionById(long id) {
-        Optional<Division> divisionOptional = divisionRepository.findById(id);
-
-        return divisionOptional.orElse(null);
+        return divisionRepository.findById(id).orElse(null);
     }
 
     public void deleteDivisionById(long id) {
@@ -42,15 +40,12 @@ public class DivisionService {
 
         if (divisionToUpdateOptional.isPresent()) {
             Division divisionToUpdate = divisionToUpdateOptional.get();
-
             divisionToUpdate.setName(updatedDivision.getName());
             divisionToUpdate.setStartBirthYear(updatedDivision.getStartBirthYear());
             divisionToUpdate.setEndBirthYear(updatedDivision.getEndBirthYear());
-
             return divisionRepository.save(divisionToUpdate);
         }
 
         return null;
     }
-
 }
