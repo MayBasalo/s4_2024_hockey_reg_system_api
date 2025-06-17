@@ -8,17 +8,28 @@ import java.util.List;
 
 @Entity
 public class Team {
+
     @Id
-    @SequenceGenerator(name = "team_sequence", sequenceName = "team_sequence", allocationSize = 1, initialValue=1)
+    @SequenceGenerator(name = "team_sequence", sequenceName = "team_sequence", allocationSize = 1, initialValue = 1)
     @GeneratedValue(generator = "team_sequence")
     private long id;
 
+    @Column(nullable = false)
     private String name;
-    @ManyToMany
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "team_players",
+        joinColumns = @JoinColumn(name = "team_id"),
+        inverseJoinColumns = @JoinColumn(name = "player_id")
+    )
     private List<Player> players;
 
     @ManyToOne
+    @JoinColumn(name = "division_id", nullable = false)
     private Division division;
+
+    // Getters and Setters
 
     public long getId() {
         return id;
