@@ -1,67 +1,65 @@
 package com.keyin.rest.team;
 
-import com.keyin.rest.division.Division;
-import com.keyin.rest.division.DivisionRepository;
-import com.keyin.rest.player.Player;
-import com.keyin.rest.player.PlayerService;
+// Removed unnecessary import of Team from the same package
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @CrossOrigin
+@RequestMapping("/team")
 public class TeamController {
+
     @Autowired
     private TeamService teamService;
 
-    @GetMapping("/team")
+    // GET all teams
+    @GetMapping
     public List<Team> getAllTeams() {
         return teamService.getAllTeams();
     }
 
-    @GetMapping("team_search")
-    public List<Team> getTeamsByPlayerLastName(@RequestParam(value = "player_last_name", required = false) String playerLastName,
-                                               @RequestParam(value = "division_name", required = false) String divisionName) {
-        List<Team> results = new ArrayList<Team>();
-
+    // SEARCH by player last name or division name
+    @GetMapping("/search")
+    public List<Team> getTeamsByFilters(
+            @RequestParam(value = "player_last_name", required = false) String playerLastName,
+            @RequestParam(value = "division_name", required = false) String divisionName
+    ) {
         if (playerLastName != null) {
-            results =  teamService.getTeamsByPlayerLastName(playerLastName);
+            return teamService.getTeamsByPlayerLastName(playerLastName);
         } else if (divisionName != null) {
-            results =  teamService.getTeamsByDivisionName(divisionName);
+            return teamService.getTeamsByDivisionName(divisionName);
         }
-
-        return results;
+        return List.of(); // Return empty list if no filters are applied
     }
 
-    @GetMapping("/team/{id}")
+    // GET team by ID
+    @GetMapping("/{id}")
     public ResponseEntity<Team> getTeamById(@PathVariable long id) {
-        Team teamToReturn = teamService.getTeamById(id);
-
-        if (teamToReturn == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(teamToReturn);
+        Team team = teamService.getTeamById(id);
+        return team != null ? ResponseEntity.ok(team) : ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/team")
-    public Team createTeam(@RequestBody Team team) {
-        System.out.println(team.getDivision());
-
-        return teamService.createTeam(team);
+    // CREATE new team
+    @PostMapping
+    public ResponseEntity<Team> createTeam(@RequestBody Team team) {
+        Team createdTeam = teamService.createTeam(team);
+        return ResponseEntity.status(201).body(createdTeam);
     }
 
-    @PutMapping("/team/{id}")
+    // UPDATE existing team
+    @PutMapping("/{id}")
     public ResponseEntity<Team> updateTeam(@PathVariable long id, @RequestBody Team team) {
-        return ResponseEntity.ok(teamService.updateTeam(id, team));
+        Team updatedTeam = teamService.updateTeam(id, team);
+        return updatedTeam != null ? ResponseEntity.ok(updatedTeam) : ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("/team/{id}")
-    public void deleteTeamById(@PathVariable long id) {
+    // DELETE team by ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTeamById(@PathVariable long id) {
         teamService.deleteTeamById(id);
+        return ResponseEntity.noContent().build();
     }
 }
