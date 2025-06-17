@@ -1,52 +1,61 @@
 package com.keyin.rest.player;
 
-import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.util.List;
 
-@Entity
-public class Player {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-    @Id
-    @SequenceGenerator(name = "player_sequence", sequenceName = "player_sequence", allocationSize = 1, initialValue = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "player_sequence")
-    private long id;
+@RestController
+@CrossOrigin
+@RequestMapping("/player")
+public class PlayerController {
 
-    private LocalDate birthday;
-    private String firstName;
-    private String lastName;
+    @Autowired
+    private PlayerService playerService;
 
-    public Player() {
+    // Get all players
+    @GetMapping
+    public List<Player> getAllPlayers() {
+        return playerService.getAllPlayers();
     }
 
-    public long getId() {
-        return id;
+    // Search players by last name (returns list)
+    @GetMapping("/search")
+    public List<Player> getPlayersByLastName(@RequestParam("last_name") String lastName) {
+        return playerService.getPlayersByLastName(lastName);
     }
 
-    public void setId(long id) {
-        this.id = id;
+    // Get player by ID
+    @GetMapping("/{id}")
+    public Player getPlayerById(@PathVariable long id) {
+        return playerService.getPlayerById(id);
     }
 
-    public LocalDate getBirthday() {
-        return birthday;
+    // Create new player
+    @PostMapping
+    public Player createPlayer(@RequestBody Player player) {
+        return playerService.createPlayer(player);
     }
 
-    public void setBirthday(LocalDate birthday) {
-        this.birthday = birthday;
+    // Update existing player
+    @PutMapping("/{id}")
+    public ResponseEntity<Player> updatePlayer(@PathVariable long id, @RequestBody Player player) {
+        return ResponseEntity.ok(playerService.updatePlayer(id, player));
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    // Delete player by ID
+    @DeleteMapping("/{id}")
+    public void deletePlayerById(@PathVariable long id) {
+        playerService.deletePlayerById(id);
     }
 }
